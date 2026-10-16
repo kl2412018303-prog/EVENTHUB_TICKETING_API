@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - EventHub</title>
+    <style>
+        body {
+            background-color: #0b0f19;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 0;
+            color: #f1f5f9;
+        }
+        .register-card {
+            background-color: #1e293b;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            width: 100%;
+            max-width: 420px;
+            border-top: 5px solid #38bdf8;
+        }
+        h2 {
+            text-align: center;
+            color: #38bdf8;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #94a3b8;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background-color: #0f172a;
+            color: #ffffff;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #38bdf8;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #0284c7;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0369a1;
+        }
+        .link-text {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        .link-text a {
+            color: #38bdf8;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .link-text a:hover {
+            text-decoration: underline;
+        }
+        #response-message {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="register-card">
+        <h2>Create Account</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" required placeholder="Your full name">
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" required placeholder="name@example.com">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="Enter password">
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="text" id="phone" placeholder="0123456789">
+            </div>
+            <div class="form-group">
+                <label>Role</label>
+                <select name="role" id="role">
+                    <option value="customer">Customer</option>
+                    <option value="organiser">Organiser</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <button type="submit">Sign Up</button>
+        </form>
+
+        <div class="link-text">
+            Already have an account? <a href="login.html">Log In</a>
+        </div>
+
+        <div id="response-message"></div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const phone = document.getElementById('phone').value;
+            const role = document.getElementById('role').value;
+            const msgDiv = document.getElementById('response-message');
+
+            msgDiv.style.color = "#94a3b8";
+            msgDiv.innerText = "Creating account...";
+
+            try {
+                const response = await fetch('http://localhost/event_ticketing_system/pages/api_register.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        full_name: fullName,
+                        email: email,
+                        password: password,
+                        phone_number: phone,
+                        role: role
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status === "success") {
+                    msgDiv.style.color = "#38bdf8";
+                    msgDiv.innerText = "Registration successful! Redirecting to login...";
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 1500);
+                } else {
+                    msgDiv.style.color = "#f87171";
+                    msgDiv.innerText = result.error || "Registration failed.";
+                }
+            } catch (error) {
+                msgDiv.style.color = "#f87171";
+                msgDiv.innerText = "Connection error to API.";
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Ticket2u Powered EventHub</title>
+    <style>
+        body {
+            background-color: #0b0f19;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            color: #f1f5f9;
+        }
+        header {
+            background-color: #0f172a;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #38bdf8;
+        }
+        h2, h3 {
+            color: #38bdf8;
+            margin: 0;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .section-title {
+            margin-top: 50px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 10px;
+        }
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        .event-card, .booking-card {
+            background-color: #1e293b;
+            border-radius: 14px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            border: 1px solid #334155;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .event-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 1px solid #334155;
+        }
+        .event-content {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .event-card h4, .booking-card h4 {
+            color: #38bdf8;
+            margin-top: 0;
+            font-size: 18px;
+        }
+        p {
+            color: #94a3b8;
+            font-size: 14px;
+            margin: 6px 0;
+        }
+        .book-btn, .view-ticket-btn {
+            background-color: #0284c7;
+            color: #ffffff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+        .book-btn:hover, .view-ticket-btn:hover {
+            background-color: #0369a1;
+        }
+        .delete-ticket-btn {
+            background-color: #ef4444;
+            color: #ffffff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 8px;
+            transition: background 0.3s;
+        }
+        .delete-ticket-btn:hover {
+            background-color: #dc2626;
+        }
+        
+        .logout-btn, .admin-nav-btn {
+            background-color: transparent;
+            border: 1px solid #38bdf8;
+            color: #38bdf8;
+            padding: 8px 12px;
+            width: 145px;
+            height: 38px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .logout-btn:hover, .admin-nav-btn:hover {
+            background-color: #38bdf8;
+            color: #0b0f19;
+        }
+        .badge {
+            display: inline-block;
+            background-color: #0f172a;
+            color: #38bdf8;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid #334155;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-card, .ticket-card {
+            background-color: #1e293b;
+            border: 2px dashed #38bdf8;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 420px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            text-align: center;
+            position: relative;
+        }
+        .ticket-header {
+            border-bottom: 2px solid #334155;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .qr-box {
+            background-color: #ffffff;
+            padding: 12px;
+            border-radius: 12px;
+            display: inline-block;
+            margin: 15px 0;
+        }
+        .qr-box img {
+            display: block;
+            width: 160px;
+            height: 160px;
+        }
+        .modal-btn {
+            background-color: #0284c7;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+        }
+        .modal-btn:hover {
+            background-color: #0369a1;
+        }
+        .close-modal {
+            background-color: transparent;
+            color: #94a3b8;
+            border: 1px solid #334155;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .close-modal:hover {
+            color: #ffffff;
+            border-color: #38bdf8;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h2>Eventra Ticket Home</h2>
+            <span id="welcome-user" style="font-size: 14px; color: #94a3b8;"></span>
+        </div>
+        <div>
+            <span id="admin-link-container"></span>
+            <button class="logout-btn" onclick="logout()">Log Out</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <h3>Featured Ticket2u Events</h3>
+        <div id="event-list" class="event-grid">
+            <p>Loading events...</p>
+        </div>
+
+        <h3 class="section-title">My Booking History</h3>
+        <div id="booking-list" class="event-grid">
+            <p>Loading booking history...</p>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal">
+        <div class="modal-card" style="border-style: solid; border-color: #38bdf8;">
+            <h3 id="confirm-title" style="color: #38bdf8; margin-bottom: 15px;">Confirm Booking</h3>
+            <p id="confirm-text" style="color: #f1f5f9; font-size: 15px; margin-bottom: 20px;"></p>
+            <button class="modal-btn" onclick="executeBooking()">Confirm & Pay</button>
+            <button class="close-modal" onclick="closeConfirmModal()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- E-Ticket Modal -->
+    <div id="ticketModal" class="modal">
+        <div class="ticket-card">
+            <div class="ticket-header">
+                <h3>🎟️ Official E-Ticket</h3>
+                <span id="t-booking-id" style="font-size: 12px; color: #38bdf8;"></span>
+            </div>
+            <h4 id="t-event-title" style="color: #38bdf8; margin: 5px 0 15px 0;"></h4>
+            <p><strong>Attendee:</strong> <span id="t-user-name"></span></p>
+            <p><strong>Venue:</strong> <span id="t-venue"></span></p>
+            <p><strong>Event Date:</strong> <span id="t-date"></span></p>
+            <p><strong>Quantity:</strong> <span id="t-qty"></span> ticket(s)</p>
+            <p><strong>Total Paid:</strong> RM <span id="t-total"></span></p>
+
+            <div class="qr-box">
+                <img id="t-qr-img" src="" alt="QR Ticket Code">
+            </div>
+            <p style="font-size: 11px; color: #38bdf8;">Scan at entrance for entry verification</p>
+
+            <button class="close-modal" onclick="closeTicketModal()">Close E-Ticket</button>
+        </div>
+    </div>
+
+    <!-- CUSTOM SUCCESS MODAL -->
+    <div id="successModal" class="modal">
+        <div class="modal-card" style="border-style: solid; border-color: #38bdf8; text-align: center;">
+            <div style="font-size: 50px; color: #38bdf8; margin-bottom: 15px;">🎉</div>
+            <h3 id="success-title" style="color: #38bdf8; margin-bottom: 15px;">Booking Successful!</h3>
+            <p id="success-text" style="color: #f1f5f9; font-size: 15px; margin-bottom: 20px;">
+                Yay! Ticket booking successful. Your ticket has been generated.
+            </p>
+            <button class="modal-btn" onclick="closeSuccessModal()">Awesome!</button>
+        </div>
+    </div>
+
+    <script>
+        const userData = localStorage.getItem('user');
+        let currentUser = null;
+
+        if (!userData) {
+            window.location.href = 'login.html';
+        } else {
+            currentUser = JSON.parse(userData);
+
+            const userRole = (currentUser.role || '').toString().toLowerCase().trim();
+
+            if (userRole === 'admin') {
+                window.location.href = 'admin_event_approval.html';
+            } else if (userRole === 'organiser' || userRole === 'organizer') {
+                window.location.href = 'organiser_dashboard.html';
+            } else {
+                document.getElementById('welcome-user').innerText = "Logged in as: " + (currentUser.full_name || 'Customer') + " (" + userRole + ")";
+            }
+        }
+
+        async function fetchEvents() {
+            try {
+                const response = await fetch('http://localhost/event_ticketing_system/pages/api_get_events.php');
+                const data = await response.json();
+                
+                const eventListDiv = document.getElementById('event-list');
+                if (data.events && data.events.length > 0) {
+                    eventListDiv.innerHTML = "";
+                    data.events.forEach(event => {
+                        const imgSrc = event.image_url ? event.image_url : 'images/limp bizkit.jpg';
+
+                        eventListDiv.innerHTML += `
+                            <div class="event-card">
+                                <img src="${imgSrc}" alt="${event.title}" class="event-img" onerror="this.src='https://via.placeholder.com/300x180?text=No+Image';">
+                                <div class="event-content">
+                                    <div>
+                                        <h4>${event.title}</h4>
+                                        <p>${event.description || 'No description available.'}</p>
+                                        <p><strong>Date:</strong> ${event.event_date}</p>
+                                        <p><strong>Venue:</strong> ${event.venue_name || 'Online / TBD'}</p>
+                                        <p><strong>Price:</strong> RM ${event.ticket_price}</p>
+                                    </div>
+                                    
+                                    <div>
+                                        <div style="margin-top: 15px;">
+                                            <label style="font-size: 13px; color: #94a3b8;">Ticket Quantity:</label>
+                                            <input type="number" id="qty-${event.event_id}" value="1" min="1" max="10" style="width: 60px; padding: 5px; margin-left: 10px; background: #0f172a; color: #fff; border: 1px solid #334155; border-radius: 4px;">
+                                        </div>
+
+                                        <button class="book-btn" onclick="promptBooking(${event.event_id}, '${event.title.replace(/'/g, "\\'")}', ${event.ticket_price})">Book Ticket</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    eventListDiv.innerHTML = "<p>No events are currently available.</p>";
+                }
+            } catch (err) {
+                document.getElementById('event-list').innerHTML = "<p style='color: #f87171;'>Failed to load event list.</p>";
+            }
+        }
+
+        async function fetchMyBookings() {
+            if (!currentUser) return;
+            try {
+                const response = await fetch(`http://localhost/event_ticketing_system/pages/api_get_my_bookings.php?user_id=${currentUser.user_id}`);
+                const data = await response.json();
+
+                const bookingListDiv = document.getElementById('booking-list');
+                if (data.bookings && data.bookings.length > 0) {
+                    bookingListDiv.innerHTML = "";
+                    data.bookings.forEach(booking => {
+                        const safeTitle = booking.event_title.replace(/'/g, "\\'");
+                        const safeVenue = (booking.venue_name || 'Online / TBD').replace(/'/g, "\\'");
+
+                        bookingListDiv.innerHTML += `
+                            <div class="booking-card" style="padding: 20px;">
+                                <h4>${booking.event_title}</h4>
+                                <p><strong>Venue:</strong> ${booking.venue_name || 'Online / TBD'}</p>
+                                <p><strong>Event Date:</strong> ${booking.event_date}</p>
+                                <p><strong>Quantity:</strong> ${booking.ticket_quantity} ticket(s)</p>
+                                <p><strong>Total Paid:</strong> RM ${parseFloat(booking.total_price).toFixed(2)}</p>
+                                <p><span class="badge">Booked on: ${booking.booking_date}</span></p>
+                                
+                                <button class="view-ticket-btn" onclick="showETicket('${booking.booking_id}', '${safeTitle}', '${safeVenue}', '${booking.event_date}', '${booking.ticket_quantity}', '${parseFloat(booking.total_price).toFixed(2)}')">View E-Ticket (QR Code)</button>
+                                <button class="delete-ticket-btn" onclick="promptDeleteBooking(${booking.booking_id}, '${safeTitle}')">Delete History</button>
+                            </div>
+                        `;
+                    });
+                } else {
+                    bookingListDiv.innerHTML = "<p>You have not made any ticket bookings yet.</p>";
+                }
+            } catch (err) {
+                document.getElementById('booking-list').innerHTML = "<p style='color: #f87171;'>Failed to load booking history.</p>";
+            }
+        }
+
+        function promptBooking(eventId, eventTitle, unitPrice) {
+            const qtyInput = document.getElementById(`qty-${eventId}`);
+            const quantity = parseInt(qtyInput.value) || 1;
+            const totalPrice = unitPrice * quantity;
+
+            document.getElementById('confirm-title').innerText = "Confirm Booking";
+            document.getElementById('confirm-text').innerHTML = `Event: <strong>${eventTitle}</strong><br>Quantity: ${quantity} ticket(s)<br>Total Amount: <strong>RM ${totalPrice.toFixed(2)}</strong>`;
+            
+            const confirmBtn = document.querySelector('#confirmModal .modal-btn');
+            confirmBtn.innerText = "Confirm & Pay";
+            confirmBtn.onclick = function() {
+                executeBooking(eventId, quantity, totalPrice);
+            };
+
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        function promptDeleteBooking(bookingId, eventTitle) {
+            document.getElementById('confirm-title').innerText = "Delete Booking History";
+            document.getElementById('confirm-text').innerHTML = `Are you sure you want to delete the booking history for:<br><strong>${eventTitle}</strong>?`;
+            
+            const confirmBtn = document.querySelector('#confirmModal .modal-btn');
+            confirmBtn.innerText = "Confirm Delete";
+            confirmBtn.onclick = function() {
+                executeDeleteBooking(bookingId);
+            };
+
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+        }
+
+        async function executeBooking(eventId, quantity, totalPrice) {
+            if (!currentUser) {
+                alert("Session expired. Please log in again.");
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost/event_ticketing_system/pages/api_book_ticket.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: currentUser.user_id,
+                        event_id: eventId,
+                        ticket_quantity: quantity,
+                        total_price: totalPrice
+                    })
+                });
+
+                const result = await response.json();
+                closeConfirmModal();
+
+                if (response.ok && result.status === "success") {
+                    showSuccessModal("Booking Successful!", "Yay! Ticket booking successful. Your ticket has been generated.");
+                    fetchMyBookings();
+                } else {
+                    alert("Booking failed: " + (result.error || "Please try again."));
+                }
+            } catch (err) {
+                closeConfirmModal();
+                alert("Server connection error.");
+            }
+        }
+
+        async function executeDeleteBooking(bookingId) {
+            try {
+                const response = await fetch('http://localhost/event_ticketing_system/pages/api_delete_booking.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ booking_id: bookingId })
+                });
+
+                const result = await response.json();
+                closeConfirmModal();
+
+                if (response.ok && result.status === 'success') {
+                    showSuccessModal("Deleted Successfully!", "The booking history has been removed from your account.");
+                    fetchMyBookings(); 
+                } else {
+                    alert("Failed to delete booking: " + (result.message || "Unknown error"));
+                }
+            } catch (err) {
+                closeConfirmModal();
+                alert("Server connection error while deleting booking.");
+            }
+        }
+
+        function showSuccessModal(title, message) {
+            document.getElementById('success-title').innerText = title;
+            document.getElementById('success-text').innerText = message;
+            document.getElementById('successModal').style.display = 'flex';
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').style.display = 'none';
+        }
+
+        function showETicket(bookingId, title, venue, date, qty, total) {
+            document.getElementById('t-booking-id').innerText = "Booking Ref: #EHB-" + bookingId;
+            document.getElementById('t-event-title').innerText = title;
+            document.getElementById('t-user-name').innerText = currentUser.full_name;
+            document.getElementById('t-venue').innerText = venue;
+            document.getElementById('t-date').innerText = date;
+            document.getElementById('t-qty').innerText = qty;
+            document.getElementById('t-total').innerText = total;
+
+            const qrData = encodeURIComponent(`E-Ticket | Booking ID: ${bookingId} | User: ${currentUser.full_name} | Event: ${title}`);
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${qrData}`;
+            document.getElementById('t-qr-img').src = qrApiUrl;
+
+            document.getElementById('ticketModal').style.display = 'flex';
+        }
+
+        function closeTicketModal() {
+            document.getElementById('ticketModal').style.display = 'none';
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+
+        fetchEvents();
+        fetchMyBookings();
+    </script>
+</body>
+</html>

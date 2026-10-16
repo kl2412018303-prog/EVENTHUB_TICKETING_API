@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Approval Portal - Admin Control Center</title>
+    <style>
+        body {
+            background-color: #0b0f19;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            color: #f1f5f9;
+        }
+        header {
+            background-color: #0f172a;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #38bdf8;
+        }
+        h2, h3 {
+            color: #38bdf8;
+            margin: 0;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .card {
+            background-color: #1e293b;
+            padding: 25px;
+            border-radius: 14px;
+            border: 1px solid #334155;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+            font-size: 14px;
+            color: #94a3b8;
+        }
+        th {
+            color: #38bdf8;
+            background-color: #0f172a;
+        }
+        .logout-btn {
+            background-color: transparent;
+            border: 1px solid #38bdf8;
+            color: #38bdf8;
+            height: 38px;
+            width: 140px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: 10px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        .logout-btn:hover {
+            background-color: #38bdf8;
+            color: #0b0f19;
+        }
+        .badge-pending {
+            background-color: #f59e0b;
+            color: #0b0f19;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .badge-approved {
+            background-color: #10b981;
+            color: #ffffff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .badge-rejected {
+            background-color: #ef4444;
+            color: #ffffff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .btn-approve {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .btn-approve:hover { background-color: #059669; }
+        .btn-reject {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-reject:hover { background-color: #dc2626; }
+        .btn-edit {
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-edit:hover { background-color: #0369a1; }
+        
+        /* Modal Popup Status */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-card {
+            background-color: #1e293b;
+            border: 2px solid #38bdf8;
+            border-radius: 16px;
+            width: 90%; max-width: 400px;
+            padding: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h2>🛡️ Admin Control Center</h2>
+            <span style="font-size: 14px; color: #94a3b8;">Admin Management Portal</span>
+        </div>
+        <div>
+            <button class="logout-btn" onclick="logout()">Log Out</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Kad 1: Senarai Kelulusan Event -->
+        <div class="card">
+            <h3>📑 Submitted Events Pending Approval</h3>
+            <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Review and moderate events submitted by registered organizers before public listing.</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Event ID</th>
+                        <th>Event Title</th>
+                        <th>Organiser</th>
+                        <th>Price (RM)</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="approval-table-body">
+                    <tr><td colspan="6" style="text-align:center;">Loading database events...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Kad 2: Senarai Tempahan Tiket Customer -->
+        <div class="card" style="margin-top: 40px;">
+            <h3>🎟️ Customer Ticket Bookings & Sales Overview</h3>
+            <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Monitor all ticket transactions made by customers across the platform.</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Customer Name</th>
+                        <th>Event Title</th>
+                        <th>Qty</th>
+                        <th>Total Paid (RM)</th>
+                        <th>Booking Date</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-booking-table-body">
+                    <tr><td colspan="6" style="text-align:center;">Loading booking transactions...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Popup Status -->
+    <div id="statusModal" class="modal">
+        <div class="modal-card">
+            <div id="modal-icon" style="font-size: 50px; margin-bottom: 15px;"></div>
+            <h3 id="modal-title" style="color: #38bdf8; margin-bottom: 15px;"></h3>
+            <p id="modal-msg" style="color: #f1f5f9; font-size: 15px; margin-bottom: 20px;"></p>
+            <button class="logout-btn" style="background-color: #0284c7; color: white; border: none; width: 100%;" onclick="closeModal()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        const userData = localStorage.getItem('user');
+        let currentUser = null;
+
+        if (!userData) {
+            window.location.href = 'login.html';
+        } else {
+            currentUser = JSON.parse(userData);
+            const role = (currentUser.role || '').toLowerCase().trim();
+            if (role !== 'admin') {
+                alert("Access Denied! Administrators only.");
+                window.location.href = 'dashboard.html';
+            }
+        }
+
+        // 1. Ambil data acara dari Database PHP
+        async function fetchEventsFromDB() {
+            try {
+                const response = await fetch('http://localhost/event_ticketing_system/pages/api_get_all_events.php');
+                const data = await response.json();
+                const tbody = document.getElementById('approval-table-body');
+                tbody.innerHTML = '';
+
+                if (data.events && data.events.length > 0) {
+                    data.events.forEach((item) => {
+                        let currentStatus = item.status || 'Pending';
+                        let badgeClass = currentStatus === 'Approved' ? 'badge-approved' : (currentStatus === 'Rejected' ? 'badge-rejected' : 'badge-pending');
+                        const safeTitle = item.title.replace(/'/g, "\\'");
+
+                        // Logik Paparan Butang Action
+                        let actionHtml = '';
+                        if (currentStatus === 'Pending') {
+                            // Event baharu -> Papar butang Approve dan Reject terus
+                            actionHtml = `
+                                <button class="btn-approve" onclick="updateEventStatus(${item.event_id}, '${safeTitle}', 'Approved')">Approve</button>
+                                <button class="btn-reject" onclick="updateEventStatus(${item.event_id}, '${safeTitle}', 'Rejected')">Reject</button>
+                            `;
+                        } else {
+                            // Event yang sudah Approved / Rejected -> Papar butang Edit sahaja
+                            actionHtml = `
+                                <button class="btn-edit" onclick="resetToApprovalButtons(${item.event_id}, '${safeTitle}')">Edit</button>
+                            `;
+                        }
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><strong>EVT-${item.event_id}</strong></td>
+                                <td><strong style="color: #f1f5f9;">${item.title}</strong></td>
+                                <td>${item.organiser_name || 'Organiser'}</td>
+                                <td>RM ${parseFloat(item.ticket_price || 0).toFixed(2)}</td>
+                                <td><span class="${badgeClass}">${currentStatus}</span></td>
+                                <td id="action-cell-${item.event_id}">
+                                    ${actionHtml}
+                                </td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No events found in database.</td></tr>`;
+                }
+            } catch (err) {
+                console.error("Fetch error:", err);
+                document.getElementById('approval-table-body').innerHTML = `<tr><td colspan="6" style="text-align:center; color:#f87171;">Failed to connect to backend API.</td></tr>`;
+            }
+        }
+
+        // 2. Apabila butang 'Edit' ditekan, tukar semula cell menjadi butang Approve/Reject
+        function resetToApprovalButtons(eventId, eventTitle) {
+            const cell = document.getElementById(`action-cell-${eventId}`);
+            if (cell) {
+                cell.innerHTML = `
+                    <button class="btn-approve" onclick="updateEventStatus(${eventId}, '${eventTitle}', 'Approved')">Approve</button>
+                    <button class="btn-reject" onclick="updateEventStatus(${eventId}, '${eventTitle}', 'Rejected')">Reject</button>
+                `;
+            }
+        }
+
+        // 3. Ambil data tempahan tiket customer dari Database PHP
+        async function fetchAdminBookings() {
+            try {
+                const response = await fetch('http://localhost/event_ticketing_system/pages/api_admin_get_bookings.php');
+                const data = await response.json();
+                const tbody = document.getElementById('admin-booking-table-body');
+                tbody.innerHTML = '';
+
+                if (data.bookings && data.bookings.length > 0) {
+                    data.bookings.forEach((item) => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><strong>#EHB-${item.booking_id}</strong></td>
+                                <td>${item.customer_name}</td>
+                                <td><strong style="color: #f1f5f9;">${item.event_title}</strong></td>
+                                <td>${item.ticket_quantity}</td>
+                                <td>RM ${parseFloat(item.total_price).toFixed(2)}</td>
+                                <td>${item.booking_date}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No ticket bookings recorded yet.</td></tr>`;
+                }
+            } catch (err) {
+                console.error("Error fetching bookings:", err);
+                document.getElementById('admin-booking-table-body').innerHTML = `<tr><td colspan="6" style="text-align:center; color:#f87171;">Failed to load booking transactions.</td></tr>`;
+            }
+        }
+
+        // 4. Kemaskini Status Acara ke Database MySQL
+        async function updateEventStatus(eventId, eventTitle, newStatus) {
+            try {
+                const response = await fetch('http://localhost/event_ticketing_system/pages/api_update_event_status.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        event_id: eventId,
+                        status: newStatus
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status === 'success') {
+                    document.getElementById('modal-icon').innerText = newStatus === 'Approved' ? '✅' : '❌';
+                    document.getElementById('modal-title').innerText = `Event ${newStatus}!`;
+                    document.getElementById('modal-msg').innerText = `Event "${eventTitle}" status has been updated to ${newStatus.toLowerCase()}.`;
+                    document.getElementById('statusModal').style.display = 'flex';
+                } else {
+                    alert("Failed to update status in database: " + (result.message || "Unknown error"));
+                }
+            } catch (err) {
+                console.error("Update status error:", err);
+                alert("Server error when updating status.");
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('statusModal').style.display = 'none';
+            // Refresh senarai jadual selepas popup ditutup
+            fetchEventsFromDB();
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+
+        // Jalankan carian data sebaik sahaja page dibuka
+        fetchEventsFromDB();
+        fetchAdminBookings();
+    </script>
+</body>
+</html>
